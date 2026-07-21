@@ -9,7 +9,9 @@
 (() => {
   "use strict";
 
-  const PALETTE = ["var(--accent-1)", "var(--accent-2)", "var(--accent-3)", "var(--accent-4)", "var(--accent-5)", "var(--accent-6)"];
+  // Orden pensado para que los primeros miembros NO usen el coral de marca:
+  // violeta, teal, azul, naranja, rosa y (por último) coral.
+  const PALETTE = ["var(--accent-1)", "var(--accent-3)", "var(--accent-5)", "var(--accent-4)", "var(--accent-6)", "var(--accent-2)"];
   const LAST_KEY = "family-points:last";
   const PERIOD_KEY = "family-points:period";
   const cacheKey = (code) => "family-points:cache:" + code;
@@ -253,9 +255,10 @@
     const sel = $("#me-select");
     if (!sel) return;
     sel.innerHTML = "";
-    sel.append(el("option", { value: "", textContent: "—" }));
+    sel.append(el("option", { value: "", textContent: "Elige quién eres" }));
     for (const m of state.members) sel.append(el("option", { value: m.id, textContent: m.name, selected: m.id === meId }));
     sel.value = meId || "";
+    sel.classList.toggle("needs-pick", !meId); // empuja a elegirte para activar el "· tú"
   }
 
   // ---- render: tabla ---------------------------------------------------
@@ -516,7 +519,6 @@
 
     $("#btn-home").addEventListener("click", leaveFamily);
     $("#btn-copy-link").addEventListener("click", copyLink);
-    $("#btn-leave").addEventListener("click", leaveFamily);
     $("#me-select").addEventListener("change", (e) => {
       meId = e.target.value || null;
       if (meId) localStorage.setItem(meKey(familyCode), meId); else localStorage.removeItem(meKey(familyCode));
