@@ -22,7 +22,7 @@
   const uid = () => Math.random().toString(36).slice(2, 9);
   const todayISO = () => new Date().toLocaleDateString("sv-SE");
   const numOr = (v, d) => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : d);
-  const isTime = (v) => typeof v === "string" && /^\d{2}:\d{2}$/.test(v);
+  const isTime = (v) => typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(v);
   const isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
   const fmt = (n) => (Math.round(n * 100) / 100).toLocaleString("es-ES");
 

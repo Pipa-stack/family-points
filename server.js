@@ -56,7 +56,7 @@ app.use("/api", apiLimiter);
 // Saneado (la API nunca confía en el cliente)
 // ---------------------------------------------------------------------------
 const uid = () => crypto.randomBytes(4).toString("hex");
-const isTime = (v) => typeof v === "string" && /^\d{2}:\d{2}$/.test(v);
+const isTime = (v) => typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(v);
 const isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
 const numOr = (v, d) => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : d);
 const str = (v, max) => String(v == null ? "" : v).slice(0, max);
@@ -247,7 +247,9 @@ app.put("/api/family/:code/config", wrap(async (req, res) => {
 // Añadir o actualizar un turno (upsert por id) — operación atómica
 app.post("/api/family/:code/shifts", wrap(async (req, res) => {
   const code = normalizeCode(req.params.code);
-  const shift = cleanShift(req.body && req.body.shift);
+  const raw = req.body && req.body.shift;
+  if (!raw || typeof raw !== "object") return res.status(400).json({ error: "bad_shift" });
+  const shift = cleanShift(raw);
   const result = await store.mutate(code, (data) => {
     const d = data && typeof data === "object" ? data : defaultState();
     if (!Array.isArray(d.shifts)) d.shifts = [];
@@ -282,6 +284,15 @@ app.use(express.static(PUBLIC_DIR));
 app.use((req, res, next) => {
   if (req.method === "GET" && !req.path.startsWith("/api")) return res.sendFile(INDEX);
   next();
+});
+
+// Manejo de errores genérico (incluye body-parser: JSON malformado, payload
+// grande). Evita filtrar trazas de pila/rutas en cualquier entorno.
+app.use((err, req, res, next) => {
+  if (err.type === "entity.too.large") return res.status(413).json({ error: "payload_too_large" });
+  if (err.type === "entity.parse.failed" || err.status === 400) return res.status(400).json({ error: "bad_json" });
+  console.error(err);
+  res.status(500).json({ error: "server_error" });
 });
 
 // ---------------------------------------------------------------------------
