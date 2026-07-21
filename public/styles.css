@@ -140,6 +140,7 @@ main {
   .bob, .hop, .wave, .tail, .heart, .sun, .cloud { animation: none; }
 }
 
+.gate-return { width: 100%; margin-bottom: 14px; color: var(--primary); border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); }
 .gate-card h2 { margin: 4px 0 6px; font-size: 1.6rem; }
 .gate-lead { color: var(--muted); font-size: .95rem; margin: 0 0 20px; }
 .btn-lg { width: 100%; padding: 15px; font-size: 1.05rem; border-radius: 16px; }

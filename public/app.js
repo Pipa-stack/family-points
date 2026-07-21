@@ -427,6 +427,11 @@
     const err = $("#gate-error");
     err.hidden = !errorMsg;
     if (errorMsg) err.textContent = errorMsg;
+    // Botón para volver a la última familia (si la hay), así ver el inicio no pierde nada.
+    const last = localStorage.getItem(LAST_KEY);
+    const ret = $("#gate-return");
+    ret.hidden = !last;
+    if (last) ret.textContent = "↩︎ Volver a mi familia (" + last + ")";
   }
 
   function showApp() {
@@ -474,9 +479,10 @@
     }
   }
 
+  // Ir al inicio (para ver la animación) SIN olvidar la familia: se guarda en
+  // LAST_KEY para poder volver con un botón.
   function leaveFamily() {
     stopPolling();
-    localStorage.removeItem(LAST_KEY);
     familyCode = null; state = null; lastSyncedAt = null; meId = null; dirtyShiftIds.clear();
     history.replaceState(null, "", "/");
     $("#gate-code").value = "";
@@ -503,6 +509,7 @@
   // ---- eventos ---------------------------------------------------------
   function bind() {
     $("#gate-create").addEventListener("click", createFamily);
+    $("#gate-return").addEventListener("click", () => { const c = localStorage.getItem(LAST_KEY); if (c) enterFamily(c); });
     $("#gate-join").addEventListener("submit", (e) => { e.preventDefault(); enterFamily($("#gate-code").value); });
 
     $("#btn-copy-link").addEventListener("click", copyLink);
