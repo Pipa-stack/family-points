@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#4f46e5" />
+  <title>Family Points</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%AD%90%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">⭐</span>
+      <div>
+        <h1>Family Points</h1>
+        <p class="tagline">Puntos por cuidar de los peques</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-settings" class="icon-btn" title="Ajustes" aria-label="Ajustes">⚙️</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Marcador / leaderboard -->
+    <section id="scoreboard" class="scoreboard" aria-label="Marcador de puntos"></section>
+
+    <!-- Tabla estilo Excel -->
+    <section class="card">
+      <div class="card-head">
+        <h2>Turnos de cuidado</h2>
+        <div class="card-head-actions">
+          <button id="btn-add" class="btn btn-primary">+ Añadir turno</button>
+        </div>
+      </div>
+      <p class="hint">
+        Apunta cuándo uno se queda con los peques (mientras el otro sale). Solo cuentan las horas
+        dentro del horario válido (<span id="hint-window">06:00–22:00</span>).
+        Edita cualquier celda como en un Excel.
+      </p>
+      <div class="table-wrap">
+        <table id="shifts-table">
+          <thead>
+            <tr>
+              <th class="col-date">Fecha</th>
+              <th class="col-member">Quién se queda</th>
+              <th class="col-time">Entrada</th>
+              <th class="col-time">Salida</th>
+              <th class="col-kids" data-perchild-col hidden>Nº peques</th>
+              <th class="col-note">Nota</th>
+              <th class="col-valid">Horas válidas</th>
+              <th class="col-points">Puntos</th>
+              <th class="col-actions" aria-label="Acciones"></th>
+            </tr>
+          </thead>
+          <tbody id="shifts-body"></tbody>
+        </table>
+      </div>
+      <div id="empty-state" class="empty-state" hidden>
+        <p>Todavía no hay turnos. Pulsa <strong>“+ Añadir turno”</strong> para empezar.</p>
+      </div>
+    </section>
+
+    <!-- Datos -->
+    <section class="card">
+      <div class="card-head">
+        <h2>Datos</h2>
+      </div>
+      <div class="btn-row">
+        <button id="btn-export-json" class="btn">⬇️ Exportar (.json)</button>
+        <button id="btn-import-json" class="btn">⬆️ Importar (.json)</button>
+        <button id="btn-export-csv" class="btn">📊 Exportar Excel (.csv)</button>
+        <button id="btn-reset" class="btn btn-danger">🗑️ Reiniciar todo</button>
+        <input id="file-input" type="file" accept="application/json,.json" hidden />
+      </div>
+      <p class="hint">Los datos se guardan en este navegador. Usa exportar/importar para pasarlos entre móviles.</p>
+    </section>
+  </main>
+
+  <!-- Panel de ajustes -->
+  <div id="settings-overlay" class="overlay" hidden>
+    <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="drawer-head">
+        <h2 id="settings-title">Ajustes</h2>
+        <button id="btn-close-settings" class="icon-btn" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="drawer-body">
+        <fieldset>
+          <legend>Reglas de puntos</legend>
+          <label class="field">
+            <span>Puntos por hora</span>
+            <input id="set-points-per-hour" type="number" min="0" step="0.5" inputmode="decimal" />
+          </label>
+          <div class="field-row">
+            <label class="field">
+              <span>Horario válido: desde</span>
+              <input id="set-day-start" type="time" />
+            </label>
+            <label class="field">
+              <span>hasta</span>
+              <input id="set-day-end" type="time" />
+            </label>
+          </div>
+          <label class="field field-check">
+            <input id="set-perchild" type="checkbox" />
+            <span>Multiplicar puntos por número de peques cuidados</span>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Miembros de la familia</legend>
+          <ul id="members-list" class="editable-list"></ul>
+          <div class="add-inline">
+            <input id="new-member-name" type="text" placeholder="Nombre (p. ej. Papá)" maxlength="24" />
+            <button id="btn-add-member" class="btn btn-sm">Añadir</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Peques</legend>
+          <ul id="children-list" class="editable-list"></ul>
+          <div class="add-inline">
+            <input id="new-child-name" type="text" placeholder="Nombre del peque" maxlength="24" />
+            <button id="btn-add-child" class="btn btn-sm">Añadir</button>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <footer class="footer">
+    <span>Hecho para repartir el cuidado con justicia · <a href="https://github.com/Pipa-stack/family-points" target="_blank" rel="noopener">código</a></span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
