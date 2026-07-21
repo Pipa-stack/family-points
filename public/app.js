@@ -423,6 +423,7 @@
     $("#app").hidden = true;
     $("#gate").hidden = false;
     $("#btn-settings").hidden = true;
+    $("#btn-home").hidden = true;
     $("#sync-status").hidden = true;
     const err = $("#gate-error");
     err.hidden = !errorMsg;
@@ -438,6 +439,7 @@
     $("#gate").hidden = true;
     $("#app").hidden = false;
     $("#btn-settings").hidden = false;
+    $("#btn-home").hidden = false;
     $("#fb-code").textContent = familyCode;
     updateWindowHint();
     renderAll();
@@ -512,6 +514,7 @@
     $("#gate-return").addEventListener("click", () => { const c = localStorage.getItem(LAST_KEY); if (c) enterFamily(c); });
     $("#gate-join").addEventListener("submit", (e) => { e.preventDefault(); enterFamily($("#gate-code").value); });
 
+    $("#btn-home").addEventListener("click", leaveFamily);
     $("#btn-copy-link").addEventListener("click", copyLink);
     $("#btn-leave").addEventListener("click", leaveFamily);
     $("#me-select").addEventListener("change", (e) => {
