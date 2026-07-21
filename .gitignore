@@ -8,3 +8,4 @@ desktop.ini
 # Logs / temp
 *.log
 node_modules/
+.gstack/

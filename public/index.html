@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#4f46e5" />
   <title>Family Points</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%AD%90%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <header class="topbar">
@@ -18,11 +18,41 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <button id="btn-settings" class="icon-btn" title="Ajustes" aria-label="Ajustes">⚙️</button>
+      <span id="sync-status" class="sync" hidden></span>
+      <button id="btn-settings" class="icon-btn" title="Ajustes" aria-label="Ajustes" hidden>⚙️</button>
     </div>
   </header>
 
-  <main>
+  <!-- Pantalla de entrada: crear o unirse a una familia -->
+  <section id="gate" class="gate" hidden>
+    <div class="gate-card">
+      <span class="gate-logo">⭐</span>
+      <h2>Bienvenido a Family Points</h2>
+      <p class="gate-lead">Crea el espacio de tu familia y comparte el enlace: todos veréis y sumaréis los mismos puntos desde cualquier móvil.</p>
+      <button id="gate-create" class="btn btn-primary btn-lg">Crear familia nueva</button>
+      <div class="gate-sep"><span>o entra con un código</span></div>
+      <form id="gate-join" class="gate-join" autocomplete="off">
+        <input id="gate-code" type="text" inputmode="text" placeholder="FAM-XXXXXX" aria-label="Código de familia" />
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+      <p id="gate-error" class="gate-error" hidden></p>
+    </div>
+  </section>
+
+  <!-- App (visible al entrar en una familia) -->
+  <main id="app" hidden>
+    <!-- Barra de familia: código + compartir -->
+    <section class="family-bar">
+      <div class="fb-info">
+        <span class="fb-label">Familia</span>
+        <strong id="fb-code" class="fb-code">FAM-…</strong>
+      </div>
+      <div class="fb-actions">
+        <button id="btn-copy-link" class="btn btn-sm">🔗 Copiar enlace</button>
+        <button id="btn-leave" class="btn btn-sm">Cambiar de familia</button>
+      </div>
+    </section>
+
     <!-- Marcador / leaderboard -->
     <section id="scoreboard" class="scoreboard" aria-label="Marcador de puntos"></section>
 
@@ -71,10 +101,10 @@
         <button id="btn-export-json" class="btn">⬇️ Exportar (.json)</button>
         <button id="btn-import-json" class="btn">⬆️ Importar (.json)</button>
         <button id="btn-export-csv" class="btn">📊 Exportar Excel (.csv)</button>
-        <button id="btn-reset" class="btn btn-danger">🗑️ Reiniciar todo</button>
+        <button id="btn-reset" class="btn btn-danger">🗑️ Vaciar esta familia</button>
         <input id="file-input" type="file" accept="application/json,.json" hidden />
       </div>
-      <p class="hint">Los datos se guardan en este navegador. Usa exportar/importar para pasarlos entre móviles.</p>
+      <p class="hint">Los puntos se guardan en la nube y se comparten con quien tenga el enlace de tu familia. Exportar/Importar sirve para copias de seguridad.</p>
     </section>
   </main>
 
@@ -82,7 +112,7 @@
   <div id="settings-overlay" class="overlay" hidden>
     <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="drawer-head">
-        <h2 id="settings-title">Ajustes</h2>
+        <h2 id="settings-title">Reglas de tu familia</h2>
         <button id="btn-close-settings" class="icon-btn" aria-label="Cerrar">✕</button>
       </div>
       <div class="drawer-body">
@@ -135,6 +165,6 @@
     <span>Hecho para repartir el cuidado con justicia · <a href="https://github.com/Pipa-stack/family-points" target="_blank" rel="noopener">código</a></span>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
