@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#4f46e5" />
+  <meta name="theme-color" content="#ff7a59" />
   <title>Family Points</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%AD%90%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="/styles.css" />
@@ -23,25 +23,101 @@
     </div>
   </header>
 
-  <!-- Pantalla de entrada: crear o unirse a una familia -->
+  <!-- Pantalla de entrada: escena pixel-art + crear/unirse -->
   <section id="gate" class="gate" hidden>
     <div class="gate-card">
-      <span class="gate-logo">⭐</span>
-      <h2>Bienvenido a Family Points</h2>
-      <p class="gate-lead">Crea el espacio de tu familia y comparte el enlace: todos veréis y sumaréis los mismos puntos desde cualquier móvil.</p>
-      <button id="gate-create" class="btn btn-primary btn-lg">Crear familia nueva</button>
-      <div class="gate-sep"><span>o entra con un código</span></div>
+      <div class="scene" aria-hidden="true">
+        <svg viewBox="0 0 160 96" shape-rendering="crispEdges" preserveAspectRatio="xMidYMid meet">
+          <!-- cielo/nubes -->
+          <g transform="translate(0,0)"><g class="cloud cloud-a"><rect x="18" y="14" width="16" height="4" fill="#ffffff"/><rect x="22" y="10" width="8" height="4" fill="#ffffff"/></g></g>
+          <g transform="translate(0,0)"><g class="cloud cloud-b"><rect x="104" y="22" width="14" height="4" fill="#ffffff"/><rect x="108" y="18" width="6" height="4" fill="#ffffff"/></g></g>
+
+          <!-- sol pulsante -->
+          <g transform="translate(128,10)"><g class="sun">
+            <rect x="-4" y="6" width="4" height="4" fill="#ffd166"/><rect x="14" y="6" width="4" height="4" fill="#ffd166"/>
+            <rect x="6" y="-4" width="4" height="4" fill="#ffd166"/><rect x="6" y="14" width="4" height="4" fill="#ffd166"/>
+            <rect x="4" y="0" width="8" height="2" fill="#ffcf4d"/><rect x="2" y="2" width="12" height="2" fill="#ffcf4d"/>
+            <rect x="0" y="4" width="16" height="4" fill="#ffd166"/><rect x="2" y="8" width="12" height="2" fill="#ffcf4d"/>
+            <rect x="4" y="10" width="8" height="2" fill="#ffcf4d"/>
+          </g></g>
+
+          <!-- suelo -->
+          <rect x="0" y="80" width="160" height="16" fill="#8ad06a"/>
+          <rect x="0" y="80" width="160" height="3" fill="#a3e08a"/>
+          <rect x="10" y="86" width="4" height="2" fill="#6fb84f"/><rect x="40" y="90" width="4" height="2" fill="#6fb84f"/>
+          <rect x="86" y="87" width="4" height="2" fill="#6fb84f"/><rect x="140" y="90" width="4" height="2" fill="#6fb84f"/>
+
+          <!-- corazones flotantes -->
+          <g transform="translate(52,52)"><g class="heart heart-a"><rect x="1" y="0" width="2" height="2" fill="#ff5d8f"/><rect x="5" y="0" width="2" height="2" fill="#ff5d8f"/><rect x="0" y="2" width="8" height="2" fill="#ff5d8f"/><rect x="2" y="4" width="4" height="2" fill="#ff5d8f"/><rect x="3" y="6" width="2" height="1" fill="#ff5d8f"/></g></g>
+          <g transform="translate(92,56)"><g class="heart heart-b"><rect x="1" y="0" width="2" height="2" fill="#ff8fab"/><rect x="5" y="0" width="2" height="2" fill="#ff8fab"/><rect x="0" y="2" width="8" height="2" fill="#ff8fab"/><rect x="2" y="4" width="4" height="2" fill="#ff8fab"/><rect x="3" y="6" width="2" height="1" fill="#ff8fab"/></g></g>
+
+          <!-- Papá (violeta), con brazo que saluda -->
+          <g transform="translate(28,56)"><g class="person bob bob-a">
+            <rect x="2" y="0" width="12" height="4" fill="#4a3222"/>
+            <rect x="2" y="4" width="12" height="6" fill="#f4c9a6"/>
+            <rect x="5" y="6" width="2" height="2" fill="#2b2b3a"/><rect x="9" y="6" width="2" height="2" fill="#2b2b3a"/>
+            <rect x="6" y="8" width="4" height="1" fill="#c65b5b"/>
+            <rect x="2" y="10" width="12" height="8" fill="#7b61ff"/>
+            <rect x="0" y="10" width="2" height="6" fill="#7b61ff"/><rect x="0" y="16" width="2" height="2" fill="#f4c9a6"/>
+            <rect x="3" y="18" width="4" height="4" fill="#33406b"/><rect x="9" y="18" width="4" height="4" fill="#33406b"/>
+            <rect x="3" y="22" width="4" height="2" fill="#23283f"/><rect x="9" y="22" width="4" height="2" fill="#23283f"/>
+            <g transform="translate(14,10)"><g class="wave">
+              <rect x="0" y="0" width="2" height="6" fill="#7b61ff"/><rect x="0" y="-2" width="2" height="2" fill="#f4c9a6"/>
+            </g></g>
+          </g></g>
+
+          <!-- Mamá (coral), pelo largo -->
+          <g transform="translate(64,56)"><g class="person bob bob-b">
+            <rect x="2" y="0" width="12" height="4" fill="#6d3b2a"/>
+            <rect x="0" y="2" width="2" height="8" fill="#6d3b2a"/><rect x="14" y="2" width="2" height="8" fill="#6d3b2a"/>
+            <rect x="2" y="4" width="12" height="6" fill="#f6cdae"/>
+            <rect x="5" y="6" width="2" height="2" fill="#2b2b3a"/><rect x="9" y="6" width="2" height="2" fill="#2b2b3a"/>
+            <rect x="6" y="8" width="4" height="1" fill="#c65b5b"/>
+            <rect x="2" y="10" width="12" height="8" fill="#ff6b6b"/>
+            <rect x="0" y="10" width="2" height="6" fill="#ff6b6b"/><rect x="14" y="10" width="2" height="6" fill="#ff6b6b"/>
+            <rect x="0" y="16" width="2" height="2" fill="#f6cdae"/><rect x="14" y="16" width="2" height="2" fill="#f6cdae"/>
+            <rect x="3" y="18" width="4" height="4" fill="#33406b"/><rect x="9" y="18" width="4" height="4" fill="#33406b"/>
+            <rect x="3" y="22" width="4" height="2" fill="#23283f"/><rect x="9" y="22" width="4" height="2" fill="#23283f"/>
+          </g></g>
+
+          <!-- Peque (teal), da saltitos -->
+          <g transform="translate(100,62)"><g class="person hop">
+            <rect x="2" y="0" width="8" height="3" fill="#f4c150"/>
+            <rect x="2" y="3" width="8" height="5" fill="#f8d9bd"/>
+            <rect x="4" y="5" width="1" height="2" fill="#2b2b3a"/><rect x="7" y="5" width="1" height="2" fill="#2b2b3a"/>
+            <rect x="5" y="7" width="2" height="1" fill="#c65b5b"/>
+            <rect x="2" y="8" width="8" height="6" fill="#26c1b0"/>
+            <rect x="0" y="8" width="2" height="5" fill="#26c1b0"/><rect x="10" y="8" width="2" height="5" fill="#26c1b0"/>
+            <rect x="0" y="13" width="2" height="2" fill="#f8d9bd"/><rect x="10" y="13" width="2" height="2" fill="#f8d9bd"/>
+            <rect x="3" y="14" width="2" height="4" fill="#33406b"/><rect x="7" y="14" width="2" height="4" fill="#33406b"/>
+          </g></g>
+
+          <!-- Gatito -->
+          <g transform="translate(122,70)"><g class="cat bob bob-c">
+            <rect x="0" y="4" width="10" height="5" fill="#ff9f43"/>
+            <rect x="8" y="0" width="6" height="5" fill="#ff9f43"/>
+            <rect x="8" y="-2" width="2" height="2" fill="#ff9f43"/><rect x="12" y="-2" width="2" height="2" fill="#ff9f43"/>
+            <rect x="11" y="2" width="1" height="1" fill="#2b2b3a"/>
+            <g class="tail"><rect x="-2" y="2" width="2" height="5" fill="#ff9f43"/></g>
+            <rect x="1" y="9" width="2" height="2" fill="#e88b2f"/><rect x="6" y="9" width="2" height="2" fill="#e88b2f"/>
+          </g></g>
+        </svg>
+      </div>
+
+      <h2>¡Hola, familia!</h2>
+      <p class="gate-lead">Cread vuestro espacio y repartid los puntos por cuidar de los peques. 💛</p>
+      <button id="gate-create" class="btn btn-primary btn-lg">✨ Crear mi familia</button>
+      <div class="gate-sep"><span>¿ya tenéis código?</span></div>
       <form id="gate-join" class="gate-join" autocomplete="off">
-        <input id="gate-code" type="text" inputmode="text" placeholder="FAM-XXXXXX" aria-label="Código de familia" />
+        <input id="gate-code" type="text" inputmode="text" placeholder="FAM-XXXXXXXX" aria-label="Código de familia" />
         <button class="btn" type="submit">Entrar</button>
       </form>
       <p id="gate-error" class="gate-error" hidden></p>
     </div>
   </section>
 
-  <!-- App (visible al entrar en una familia) -->
+  <!-- App -->
   <main id="app" hidden>
-    <!-- Barra de familia: código + compartir -->
     <section class="family-bar">
       <div class="fb-info">
         <span class="fb-label">Familia</span>
@@ -52,13 +128,12 @@
           <select id="me-select" aria-label="Marca cuál eres tú"><option value="">—</option></select>
         </label>
         <button id="btn-copy-link" class="btn btn-sm">🔗 Copiar enlace</button>
-        <button id="btn-leave" class="btn btn-sm">Cambiar de familia</button>
+        <button id="btn-leave" class="btn btn-sm">Cambiar</button>
       </div>
     </section>
 
-    <!-- Marcador / leaderboard -->
     <div class="scoreboard-head">
-      <h2>Marcador</h2>
+      <h2>🏆 Marcador</h2>
       <div id="period-control" class="segmented" role="group" aria-label="Periodo del marcador">
         <button type="button" data-period="week">Semana</button>
         <button type="button" data-period="month">Mes</button>
@@ -67,19 +142,12 @@
     </div>
     <section id="scoreboard" class="scoreboard" aria-label="Marcador de puntos"></section>
 
-    <!-- Tabla estilo Excel -->
     <section class="card">
       <div class="card-head">
-        <h2>Turnos de cuidado</h2>
-        <div class="card-head-actions">
-          <button id="btn-add" class="btn btn-primary">+ Añadir turno</button>
-        </div>
+        <h2>📋 Turnos de cuidado</h2>
+        <button id="btn-add" class="btn btn-primary">+ Añadir turno</button>
       </div>
-      <p class="hint">
-        Apunta cuándo uno se queda con los peques (mientras el otro sale). Solo cuentan las horas
-        dentro del horario válido (<span id="hint-window">06:00–22:00</span>).
-        Edita cualquier celda como en un Excel.
-      </p>
+      <p class="hint">Apunta cuándo uno se queda con los peques mientras el otro sale. Solo cuentan las horas dentro del horario (<span id="hint-window">06:00–22:00</span>).</p>
       <div class="table-wrap">
         <table id="shifts-table">
           <thead>
@@ -99,23 +167,8 @@
         </table>
       </div>
       <div id="empty-state" class="empty-state" hidden>
-        <p>Todavía no hay turnos. Pulsa <strong>“+ Añadir turno”</strong> para empezar.</p>
+        <p>🌱 Todavía no hay turnos. Pulsa <strong>“+ Añadir turno”</strong> para empezar.</p>
       </div>
-    </section>
-
-    <!-- Datos -->
-    <section class="card">
-      <div class="card-head">
-        <h2>Datos</h2>
-      </div>
-      <div class="btn-row">
-        <button id="btn-export-json" class="btn">⬇️ Exportar (.json)</button>
-        <button id="btn-import-json" class="btn">⬆️ Importar (.json)</button>
-        <button id="btn-export-csv" class="btn">📊 Exportar Excel (.csv)</button>
-        <button id="btn-reset" class="btn btn-danger">🗑️ Vaciar esta familia</button>
-        <input id="file-input" type="file" accept="application/json,.json" hidden />
-      </div>
-      <p class="hint">Los puntos se guardan en la nube y se comparten con quien tenga el enlace de tu familia. Exportar/Importar sirve para copias de seguridad.</p>
     </section>
   </main>
 
@@ -123,12 +176,12 @@
   <div id="settings-overlay" class="overlay" hidden>
     <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="drawer-head">
-        <h2 id="settings-title">Reglas de tu familia</h2>
+        <h2 id="settings-title">⚙️ Ajustes</h2>
         <button id="btn-close-settings" class="icon-btn" aria-label="Cerrar">✕</button>
       </div>
       <div class="drawer-body">
         <fieldset>
-          <legend>Reglas de puntos</legend>
+          <legend>⭐ Reglas de puntos</legend>
           <label class="field">
             <span>Puntos por hora</span>
             <input id="set-points-per-hour" type="number" min="0" step="0.5" inputmode="decimal" />
@@ -150,7 +203,7 @@
         </fieldset>
 
         <fieldset>
-          <legend>Miembros de la familia</legend>
+          <legend>👨‍👩‍👧 Miembros de la familia</legend>
           <ul id="members-list" class="editable-list"></ul>
           <div class="add-inline">
             <input id="new-member-name" type="text" placeholder="Nombre (p. ej. Papá)" maxlength="24" />
@@ -159,12 +212,24 @@
         </fieldset>
 
         <fieldset>
-          <legend>Peques</legend>
+          <legend>🧒 Peques</legend>
           <ul id="children-list" class="editable-list"></ul>
           <div class="add-inline">
             <input id="new-child-name" type="text" placeholder="Nombre del peque" maxlength="24" />
             <button id="btn-add-child" class="btn btn-sm">Añadir</button>
           </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>💾 Datos y copias</legend>
+          <div class="btn-row">
+            <button id="btn-export-json" class="btn btn-sm">⬇️ Exportar</button>
+            <button id="btn-import-json" class="btn btn-sm">⬆️ Importar</button>
+            <button id="btn-export-csv" class="btn btn-sm">📊 Excel (.csv)</button>
+            <input id="file-input" type="file" accept="application/json,.json" hidden />
+          </div>
+          <button id="btn-reset" class="btn btn-danger btn-sm">🗑️ Vaciar esta familia</button>
+          <p class="hint">Los puntos se guardan en la nube y se comparten con quien tenga el enlace. Exportar sirve de copia de seguridad.</p>
         </fieldset>
       </div>
     </div>
@@ -173,7 +238,7 @@
   <div id="toast" class="toast" hidden></div>
 
   <footer class="footer">
-    <span>Hecho para repartir el cuidado con justicia · <a href="https://github.com/Pipa-stack/family-points" target="_blank" rel="noopener">código</a></span>
+    <span>Hecho con 💛 para repartir el cuidado con justicia · <a href="https://github.com/Pipa-stack/family-points" target="_blank" rel="noopener">código</a></span>
   </footer>
 
   <script src="/app.js"></script>
