@@ -47,8 +47,11 @@
 
   // cola de guardado
   const dirtyShiftIds = new Set();
+  const pendingDeletes = new Set();
   let shiftTimer = null;
   let configTimer = null;
+  let configDirty = false;
+  let flushing = false;
 
   function defaultState() {
     return {
@@ -62,6 +65,10 @@
   function normalize(data) {
     const base = defaultState();
     const s = data && typeof data === "object" ? data : {};
+    const members = Array.isArray(s.members) && s.members.length
+      ? s.members.map((m) => ({ id: m.id || uid(), name: String(m.name || "").slice(0, 24) || "Sin nombre" }))
+      : base.members;
+    const firstId = members[0] ? members[0].id : "";
     return {
       settings: {
         pointsPerHour: numOr(s.settings?.pointsPerHour, 1),
@@ -69,15 +76,13 @@
         dayEnd: isTime(s.settings?.dayEnd) ? s.settings.dayEnd : "22:00",
         perChild: !!s.settings?.perChild,
       },
-      members: Array.isArray(s.members) && s.members.length
-        ? s.members.map((m) => ({ id: m.id || uid(), name: String(m.name || "").slice(0, 24) || "Sin nombre" }))
-        : base.members,
-      children: Array.isArray(s.children) ? s.children.map((c) => ({ id: c.id || uid(), name: String(c.name || "").slice(0, 24) || "Peque" })) : base.children,
+      members,
+      children: Array.isArray(s.children) ? s.children.map((c) => ({ id: c.id || uid(), name: String(c.name || "").slice(0, 24) || "Peque" })) : [],
       shifts: Array.isArray(s.shifts)
         ? s.shifts.map((sh) => ({
             id: sh.id || uid(),
             date: isDate(sh.date) ? sh.date : todayISO(),
-            memberId: sh.memberId || "",
+            memberId: sh.memberId || firstId,
             start: isTime(sh.start) ? sh.start : "",
             end: isTime(sh.end) ? sh.end : "",
             kids: Number.isFinite(sh.kids) ? sh.kids : null,
@@ -111,12 +116,10 @@
     const e = Math.min(toMin(shift.end), toMin(state.settings.dayEnd));
     return Math.max(0, e - s) / 60;
   }
+  const kidsFor = (shift) => (Number.isFinite(shift.kids) && shift.kids > 0 ? shift.kids : state.children.length || 1);
   function shiftPoints(shift) {
     let pts = validHours(shift) * state.settings.pointsPerHour;
-    if (state.settings.perChild) {
-      const kids = Number.isFinite(shift.kids) && shift.kids > 0 ? shift.kids : state.children.length || 1;
-      pts *= kids;
-    }
+    if (state.settings.perChild) pts *= kidsFor(shift);
     return pts;
   }
   const memberById = (id) => state.members.find((m) => m.id === id);
@@ -147,7 +150,7 @@
     node.className = "sync " + status;
   }
   function cacheLocal() { try { localStorage.setItem(cacheKey(familyCode), JSON.stringify(state)); } catch {} }
-  const hasPending = () => dirtyShiftIds.size > 0;
+  const hasPending = () => dirtyShiftIds.size > 0 || pendingDeletes.size > 0 || configDirty || flushing;
 
   function queueShift(id) {
     cacheLocal();
@@ -157,6 +160,7 @@
     shiftTimer = setTimeout(flushShifts, 500);
   }
   async function flushShifts() {
+    flushing = true; // evita que poll() sobrescriba mientras se sube un turno nuevo
     const ids = [...dirtyShiftIds];
     dirtyShiftIds.clear();
     let ok = true;
@@ -166,12 +170,14 @@
       try { const r = await API.upsertShift(familyCode, sh); lastSyncedAt = r.updatedAt; }
       catch { ok = false; dirtyShiftIds.add(id); }
     }
-    if (ok && dirtyShiftIds.size === 0) setSync("saved");
-    else { setSync("error"); clearTimeout(shiftTimer); shiftTimer = setTimeout(flushShifts, 4000); }
+    flushing = false;
+    if (ok && !hasPending()) setSync("saved");
+    else if (!ok) { setSync("error"); clearTimeout(shiftTimer); shiftTimer = setTimeout(flushShifts, 4000); }
   }
 
   function queueConfig() {
     cacheLocal();
+    configDirty = true;
     setSync("saving");
     clearTimeout(configTimer);
     configTimer = setTimeout(flushConfig, 500);
@@ -179,14 +185,23 @@
   async function flushConfig() {
     try {
       const r = await API.saveConfig(familyCode, { settings: state.settings, members: state.members, children: state.children });
-      lastSyncedAt = r.updatedAt; setSync("saved");
+      lastSyncedAt = r.updatedAt; configDirty = false; if (!hasPending()) setSync("saved");
     } catch { setSync("error"); clearTimeout(configTimer); configTimer = setTimeout(flushConfig, 4000); }
   }
 
-  async function deleteShiftRemote(id) {
-    cacheLocal(); setSync("saving");
-    try { const r = await API.deleteShift(familyCode, id); lastSyncedAt = r.updatedAt; setSync("saved"); }
-    catch { setSync("error"); }
+  function queueDelete(id) {
+    cacheLocal();
+    pendingDeletes.add(id);
+    setSync("saving");
+    flushDeletes();
+  }
+  async function flushDeletes() {
+    for (const id of [...pendingDeletes]) {
+      try { const r = await API.deleteShift(familyCode, id); lastSyncedAt = r.updatedAt; pendingDeletes.delete(id); }
+      catch (e) { if (e.status === 404) pendingDeletes.delete(id); } // 404 = ya no existe
+    }
+    if (pendingDeletes.size === 0) { if (!hasPending()) setSync("saved"); }
+    else { setSync("error"); setTimeout(flushDeletes, 4000); }
   }
   async function replaceRemote() {
     cacheLocal(); setSync("saving");
@@ -198,7 +213,7 @@
   function stopPolling() { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
   function isEditing() {
     const a = document.activeElement;
-    return a && ["INPUT", "SELECT", "TEXTAREA"].includes(a.tagName) && a.closest("#app");
+    return a && ["INPUT", "SELECT", "TEXTAREA"].includes(a.tagName) && a.closest("#app, #settings-overlay");
   }
   async function poll() {
     if (document.hidden || hasPending() || isEditing() || !familyCode) return;
@@ -276,7 +291,6 @@
 
     const sel = el("select", { className: "cell-select", "aria-label": "Quién se queda" });
     for (const m of state.members) sel.append(el("option", { value: m.id, textContent: m.name, selected: m.id === shift.memberId }));
-    if (!shift.memberId && state.members[0]) shift.memberId = state.members[0].id;
     if (shift.memberId && !state.members.some((m) => m.id === shift.memberId)) {
       sel.append(el("option", { value: shift.memberId, textContent: "— sin asignar —", selected: true }));
     }
@@ -298,15 +312,19 @@
     tr.append(labelCell("Horas válidas", "cell-valid", hours ? fmt(hours) + " h" : "—"));
 
     const pts = shiftPoints(shift);
-    const invalid = isTime(shift.start) && isTime(shift.end) && hours === 0;
-    tr.append(labelCell("Puntos", "cell-points" + (pts === 0 ? " warn" : ""), invalid ? "0 (fuera de horario)" : fmt(pts)));
+    const bothTimes = isTime(shift.start) && isTime(shift.end);
+    const reversed = bothTimes && toMin(shift.end) <= toMin(shift.start);
+    let ptsText = fmt(pts);
+    if (reversed) ptsText = "0 (salida ≤ entrada)";
+    else if (bothTimes && hours === 0) ptsText = "0 (fuera de horario)";
+    tr.append(labelCell("Puntos", "cell-points" + (pts === 0 ? " warn" : ""), ptsText));
 
     const del = el("button", { className: "row-del", title: "Borrar turno", "aria-label": "Borrar turno", textContent: "🗑️" });
     del.addEventListener("click", () => {
       state.shifts = state.shifts.filter((s) => s.id !== shift.id);
       dirtyShiftIds.delete(shift.id);
       renderAll();
-      deleteShiftRemote(shift.id);
+      queueDelete(shift.id);
     });
     tr.append(el("td", { className: "col-actions" }, del));
     return tr;
@@ -383,7 +401,7 @@
     const head = ["Fecha", "Quién se queda", "Entrada", "Salida", "Nº peques", "Horas válidas", "Puntos", "Nota"];
     const rows = state.shifts.map((s) => [
       s.date, memberById(s.memberId)?.name || "(sin asignar)", s.start, s.end,
-      state.settings.perChild ? (s.kids ?? state.children.length) : "",
+      state.settings.perChild ? kidsFor(s) : "",
       fmt(validHours(s)), fmt(shiftPoints(s)), (s.note || "").replace(/"/g, '""'),
     ]);
     const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c)}"`).join(";")).join("\r\n");
@@ -453,7 +471,7 @@
     state = normalize(data);
     lastSyncedAt = updatedAt;
     meId = localStorage.getItem(meKey(familyCode));
-    dirtyShiftIds.clear();
+    dirtyShiftIds.clear(); pendingDeletes.clear(); configDirty = false; flushing = false;
     localStorage.setItem(LAST_KEY, familyCode);
     cacheLocal();
     history.replaceState(null, "", "/f/" + familyCode);
@@ -488,7 +506,8 @@
   // LAST_KEY para poder volver con un botón.
   function leaveFamily() {
     stopPolling();
-    familyCode = null; state = null; lastSyncedAt = null; meId = null; dirtyShiftIds.clear();
+    familyCode = null; state = null; lastSyncedAt = null; meId = null;
+    dirtyShiftIds.clear(); pendingDeletes.clear(); configDirty = false; flushing = false;
     history.replaceState(null, "", "/");
     $("#gate-code").value = "";
     showGate();
@@ -564,7 +583,12 @@
     $("#btn-reset").addEventListener("click", resetAll);
 
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSettings(); });
-    window.addEventListener("online", () => { if (familyCode && hasPending()) flushShifts(); });
+    window.addEventListener("online", () => {
+      if (!familyCode) return;
+      if (dirtyShiftIds.size) flushShifts();
+      if (pendingDeletes.size) flushDeletes();
+      if (configDirty) flushConfig();
+    });
   }
 
   // ---- init ------------------------------------------------------------
