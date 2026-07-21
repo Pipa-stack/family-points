@@ -48,12 +48,23 @@
         <strong id="fb-code" class="fb-code">FAM-…</strong>
       </div>
       <div class="fb-actions">
+        <label class="me-pick">Yo soy
+          <select id="me-select" aria-label="Marca cuál eres tú"><option value="">—</option></select>
+        </label>
         <button id="btn-copy-link" class="btn btn-sm">🔗 Copiar enlace</button>
         <button id="btn-leave" class="btn btn-sm">Cambiar de familia</button>
       </div>
     </section>
 
     <!-- Marcador / leaderboard -->
+    <div class="scoreboard-head">
+      <h2>Marcador</h2>
+      <div id="period-control" class="segmented" role="group" aria-label="Periodo del marcador">
+        <button type="button" data-period="week">Semana</button>
+        <button type="button" data-period="month">Mes</button>
+        <button type="button" data-period="all">Total</button>
+      </div>
+    </div>
     <section id="scoreboard" class="scoreboard" aria-label="Marcador de puntos"></section>
 
     <!-- Tabla estilo Excel -->

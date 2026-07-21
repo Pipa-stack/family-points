@@ -176,7 +176,21 @@ main {
 .score-card .unit { font-size: .8rem; color: var(--muted); font-weight: 500; }
 .score-card .sub { font-size: .78rem; color: var(--muted); margin-top: 2px; }
 .score-card.leader { outline: 2px solid var(--chip, var(--primary)); }
+.score-card.me { border-color: var(--chip, var(--primary)); }
 .score-card .crown { position: absolute; top: 10px; right: 12px; font-size: 1.1rem; }
+.me-tag { color: var(--muted); font-weight: 600; font-size: .8rem; margin-left: 4px; }
+
+/* Cabecera del marcador + control de periodo */
+.scoreboard-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: -4px; }
+.scoreboard-head h2 { font-size: 1.05rem; }
+.segmented { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; }
+.segmented button { border: none; background: var(--card); color: var(--muted); padding: 6px 12px; font-size: .82rem; font-weight: 600; cursor: pointer; }
+.segmented button + button { border-left: 1px solid var(--border); }
+.segmented button.active { background: var(--primary); color: var(--primary-ink); }
+
+/* Selector "yo soy" en la barra de familia */
+.me-pick { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.me-pick select { border: 1px solid var(--border-strong); background: var(--card); color: var(--text); border-radius: 8px; padding: 5px 8px; font: inherit; font-size: .85rem; text-transform: none; letter-spacing: 0; }
 
 /* Cards */
 .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
@@ -226,7 +240,8 @@ tbody tr:hover { background: color-mix(in srgb, var(--primary) 4%, transparent);
 .cell-input:hover, .cell-select:hover { border-color: var(--border); }
 .cell-input:focus, .cell-select:focus { outline: none; border-color: var(--primary); background: var(--card); box-shadow: 0 0 0 3px var(--primary-soft); }
 .cell-select { cursor: pointer; }
-input[type="date"].cell-input, input[type="time"].cell-input { min-width: 120px; }
+input[type="time"].cell-input { min-width: 88px; }
+input[type="date"].cell-input { min-width: 106px; }
 .col-kids input { max-width: 70px; }
 
 .row-del { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 6px 8px; border-radius: 8px; }
@@ -272,7 +287,24 @@ legend { padding: 0 6px; font-weight: 700; font-size: .9rem; }
 }
 @keyframes toastin { from { transform: translate(-50%, 12px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 
+td[data-label="Nota"] .cell-input { min-width: 118px; }
+
 @media (max-width: 560px) {
   .tagline { display: none; }
   .card-head { flex-wrap: wrap; }
+
+  /* La tabla pasa a tarjetas: una por turno, sin scroll horizontal */
+  .table-wrap { overflow-x: visible; margin: 0; }
+  #shifts-table { min-width: 0; }
+  #shifts-table thead { display: none; }
+  #shifts-table, #shifts-table tbody, #shifts-table tr, #shifts-table td { display: block; width: auto; }
+  #shifts-body tr { border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; margin-bottom: 12px; }
+  #shifts-body tr:hover { background: transparent; }
+  #shifts-body td { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: none; padding: 5px 0; }
+  #shifts-body td::before { content: attr(data-label); color: var(--muted); font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; flex: 0 0 auto; }
+  #shifts-body td.col-actions { justify-content: flex-end; padding-top: 4px; }
+  #shifts-body td.col-actions::before { content: ""; }
+  #shifts-body .cell-input, #shifts-body .cell-select { width: auto; flex: 1; max-width: 62%; text-align: left; }
+  #shifts-body td[data-label="Nota"] .cell-input { min-width: 0; }
+  #shifts-body td.cell-valid, #shifts-body td.cell-points { text-align: right; }
 }
