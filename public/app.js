@@ -12,6 +12,36 @@
   // Orden pensado para que los primeros miembros NO usen el coral de marca:
   // violeta, teal, azul, naranja, rosa y (por último) coral.
   const PALETTE = ["var(--accent-1)", "var(--accent-3)", "var(--accent-5)", "var(--accent-4)", "var(--accent-6)", "var(--accent-2)"];
+  const PALETTE_HEX = ["#7c5cff", "#1fb6a6", "#4dabf7", "#ff9f43", "#f368e0", "#ff6b6b"];
+
+  // ---- avatares pixel-art (cara + pelo; la camiseta usa el color del miembro) ----
+  const AVATAR_STYLES = [
+    { skin: "#f4c9a6", hair: "#4a3222", type: "short" },
+    { skin: "#f6cdae", hair: "#6d3b2a", type: "long" },
+    { skin: "#f8d9bd", hair: "#f4c150", type: "short" },
+    { skin: "#c68642", hair: "#2b2b3a", type: "curly" },
+    { skin: "#ffdbac", hair: "#e0a05a", type: "short", bow: true },
+    { skin: "#e8b98a", hair: "#3a3a44", type: "long" },
+    { skin: "#f4c9a6", hair: "#9a9a9a", type: "short" },
+    { skin: "#d9a066", hair: "#5a3a1a", type: "curly" },
+  ];
+  const avatarIdx = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? Math.floor(n) % AVATAR_STYLES.length : d; };
+
+  function avatarDataUri(styleIndex, shirtHex) {
+    const s = AVATAR_STYLES[((styleIndex % AVATAR_STYLES.length) + AVATAR_STYLES.length) % AVATAR_STYLES.length];
+    const R = (x, y, w, h, f) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`;
+    const H = s.hair;
+    let hair = R(4, 1, 8, 1, H) + R(3, 2, 10, 2, H);
+    if (s.type === "long") hair += R(3, 3, 1, 8, H) + R(12, 3, 1, 8, H);
+    else if (s.type === "curly") hair = R(3, 1, 10, 1, H) + R(2, 2, 12, 2, H) + R(3, 3, 1, 3, H) + R(12, 3, 1, 3, H);
+    else hair += R(3, 3, 1, 2, H) + R(12, 3, 1, 2, H);
+    if (s.bow) hair += R(2, 1, 2, 2, "#ff5d8f") + R(1, 2, 1, 1, "#e0447a");
+    const body = R(4, 3, 8, 8, s.skin) + R(6, 5, 1, 2, "#2b2b3a") + R(9, 5, 1, 2, "#2b2b3a") +
+      R(6, 8, 4, 1, "#b0574d") + R(6, 11, 4, 2, s.skin) + R(2, 13, 12, 3, shirtHex);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">${hair}${body}</svg>`;
+    return "data:image/svg+xml," + encodeURIComponent(svg);
+  }
+  const avatarImg = (styleIndex, shirtHex, size) => el("img", { className: "avatar", src: avatarDataUri(styleIndex, shirtHex), alt: "", width: size, height: size });
   const LAST_KEY = "family-points:last";
   const PERIOD_KEY = "family-points:period";
   const cacheKey = (code) => "family-points:cache:" + code;
@@ -56,8 +86,8 @@
   function defaultState() {
     return {
       settings: { pointsPerHour: 1, dayStart: "06:00", dayEnd: "22:00", perChild: false },
-      members: [{ id: uid(), name: "Papá" }, { id: uid(), name: "Mamá" }],
-      children: [{ id: uid(), name: "Peque" }],
+      members: [{ id: uid(), name: "Papá", avatar: 0 }, { id: uid(), name: "Mamá", avatar: 1 }],
+      children: [{ id: uid(), name: "Peque", avatar: 2 }],
       shifts: [],
     };
   }
@@ -66,7 +96,7 @@
     const base = defaultState();
     const s = data && typeof data === "object" ? data : {};
     const members = Array.isArray(s.members) && s.members.length
-      ? s.members.map((m) => ({ id: m.id || uid(), name: String(m.name || "").slice(0, 24) || "Sin nombre" }))
+      ? s.members.map((m) => ({ id: m.id || uid(), name: String(m.name || "").slice(0, 24) || "Sin nombre", avatar: avatarIdx(m.avatar, 0) }))
       : base.members;
     const firstId = members[0] ? members[0].id : "";
     return {
@@ -77,7 +107,7 @@
         perChild: !!s.settings?.perChild,
       },
       members,
-      children: Array.isArray(s.children) ? s.children.map((c) => ({ id: c.id || uid(), name: String(c.name || "").slice(0, 24) || "Peque" })) : [],
+      children: Array.isArray(s.children) ? s.children.map((c) => ({ id: c.id || uid(), name: String(c.name || "").slice(0, 24) || "Peque", avatar: avatarIdx(c.avatar, 2) })) : [],
       shifts: Array.isArray(s.shifts)
         ? s.shifts.map((sh) => ({
             id: sh.id || uid(),
@@ -124,6 +154,7 @@
   }
   const memberById = (id) => state.members.find((m) => m.id === id);
   const colorFor = (id) => { const i = state.members.findIndex((m) => m.id === id); return PALETTE[(i < 0 ? 0 : i) % PALETTE.length]; };
+  const colorHexFor = (id) => { const i = state.members.findIndex((m) => m.id === id); return PALETTE_HEX[(i < 0 ? 0 : i) % PALETTE_HEX.length]; };
 
   // periodo -------------------------------------------------------------
   function weekRange(now) {
@@ -252,7 +283,7 @@
       const isMe = t.member.id === meId;
       const card = el("div", { className: "score-card" + (isLeader ? " leader" : "") + (isMe ? " me" : "") });
       card.style.setProperty("--chip", colorFor(t.member.id));
-      const who = el("div", { className: "who" }, [el("span", { className: "dot" }), document.createTextNode(t.member.name)]);
+      const who = el("div", { className: "who" }, [avatarImg(t.member.avatar || 0, colorHexFor(t.member.id), 30), document.createTextNode(t.member.name)]);
       if (isMe) who.append(el("span", { className: "me-tag" }, "· tú"));
       card.append(
         who,
@@ -366,8 +397,9 @@
     const ul = $("#members-list");
     ul.innerHTML = "";
     state.members.forEach((m) => {
-      const dot = el("span", { className: "dot" });
-      dot.style.background = colorFor(m.id);
+      const avBtn = el("button", { className: "avatar-btn", type: "button", title: "Cambiar avatar", "aria-label": "Cambiar avatar de " + m.name });
+      avBtn.append(avatarImg(m.avatar || 0, colorHexFor(m.id), 32));
+      avBtn.addEventListener("click", () => { m.avatar = ((m.avatar || 0) + 1) % AVATAR_STYLES.length; queueConfig(); renderScoreboard(); renderMembersEditor(); });
       const input = el("input", { type: "text", value: m.name, maxLength: "24", "aria-label": "Nombre del miembro" });
       input.addEventListener("change", () => { m.name = input.value.trim().slice(0, 24) || "Sin nombre"; input.value = m.name; queueConfig(); renderScoreboard(); renderTable(); });
       const del = el("button", { className: "row-del", textContent: "🗑️", title: "Quitar miembro", "aria-label": "Quitar miembro" });
@@ -378,19 +410,22 @@
         if (meId === m.id) { meId = null; localStorage.removeItem(meKey(familyCode)); }
         queueConfig(); renderAll(); renderSettings();
       });
-      ul.append(el("li", {}, [dot, input, del]));
+      ul.append(el("li", {}, [avBtn, input, del]));
     });
   }
 
   function renderChildrenEditor() {
     const ul = $("#children-list");
     ul.innerHTML = "";
-    state.children.forEach((c) => {
+    state.children.forEach((c, i) => {
+      const avBtn = el("button", { className: "avatar-btn", type: "button", title: "Cambiar avatar", "aria-label": "Cambiar avatar de " + c.name });
+      avBtn.append(avatarImg(c.avatar != null ? c.avatar : 2, PALETTE_HEX[i % PALETTE_HEX.length], 32));
+      avBtn.addEventListener("click", () => { c.avatar = (((c.avatar != null ? c.avatar : 2) + 1)) % AVATAR_STYLES.length; queueConfig(); renderChildrenEditor(); });
       const input = el("input", { type: "text", value: c.name, maxLength: "24", "aria-label": "Nombre del peque" });
       input.addEventListener("change", () => { c.name = input.value.trim().slice(0, 24) || "Peque"; input.value = c.name; queueConfig(); });
       const del = el("button", { className: "row-del", textContent: "🗑️", title: "Quitar peque", "aria-label": "Quitar peque" });
       del.addEventListener("click", () => { state.children = state.children.filter((x) => x.id !== c.id); queueConfig(); renderChildrenEditor(); renderTable(); });
-      ul.append(el("li", {}, [input, del]));
+      ul.append(el("li", {}, [avBtn, input, del]));
     });
   }
 

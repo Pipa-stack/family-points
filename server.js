@@ -70,8 +70,9 @@ function cleanSettings(s) {
     perChild: !!s.perChild,
   };
 }
-const cleanMember = (m) => ({ id: str(m && m.id, 40) || uid(), name: str(m && m.name, 24) || "Sin nombre" });
-const cleanChild = (c) => ({ id: str(c && c.id, 40) || uid(), name: str(c && c.name, 24) || "Peque" });
+const avatarIdx = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 0 && n < 24 ? Math.floor(n) : d; };
+const cleanMember = (m) => ({ id: str(m && m.id, 40) || uid(), name: str(m && m.name, 24) || "Sin nombre", avatar: avatarIdx(m && m.avatar, 0) });
+const cleanChild = (c) => ({ id: str(c && c.id, 40) || uid(), name: str(c && c.name, 24) || "Peque", avatar: avatarIdx(c && c.avatar, 2) });
 function cleanShift(sh) {
   sh = sh || {};
   return {
@@ -88,8 +89,8 @@ function cleanShift(sh) {
 function defaultState() {
   return {
     settings: cleanSettings({}),
-    members: [{ id: uid(), name: "Papá" }, { id: uid(), name: "Mamá" }],
-    children: [{ id: uid(), name: "Peque" }],
+    members: [{ id: uid(), name: "Papá", avatar: 0 }, { id: uid(), name: "Mamá", avatar: 1 }],
+    children: [{ id: uid(), name: "Peque", avatar: 2 }],
     shifts: [],
   };
 }
